@@ -2,9 +2,7 @@
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('meshblu-mailgun')
-var fs = require('fs');
-var mailgun = require('mailgun-js');
-
+var mailgun;
 
 
 var MESSAGE_SCHEMA = {
@@ -18,11 +16,11 @@ var MESSAGE_SCHEMA = {
       type: 'string',
       required: true
     },
-    text: {
+    subject: {
       type: 'string',
       required: true
     },
-    subject: {
+    text: {
       type: 'string',
       required: true
     },
@@ -62,11 +60,8 @@ Plugin.prototype.onMessage = function(message){
   var payload = message.payload;
   var img = payload.b64;
   var data = img.replace(/^data:image\/\w+;base64,/, "");
-  var buf = new Buffer(data, 'base64');
-  fs.writeFile('octoblu.jpeg', buf);
+  var file = new Buffer(data, 'base64');
   var filename = 'octoblu.jpeg';
-  var file = fs.readFileSync(filename);
-
 
   var attch = new mailgun.Attachment({data: file, filename: filename});
 
@@ -91,8 +86,9 @@ Plugin.prototype.onConfig = function(device){
 Plugin.prototype.setOptions = function(options){
   var self = this;
   self.options = options;
-  mailgun.apiKey = self.options.apiKey;
-  mailgun.domain = self.options.domain;
+  console.log(options);
+  mailgun = require('mailgun-js')({apiKey: self.options.apiKey, domain: self.options.domain});
+
 };
 
 module.exports = {
